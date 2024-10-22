@@ -1,0 +1,424 @@
+# Machine Learning and AI Introduction for New Orleanians
+
+## Introduction to Artificial Intelligence and Machine Learning
+
+### What is Artificial Intelligence (AI)?
+
+Artificial Intelligence refers to the simulation of human intelligence in machines programmed to think and learn like humans. AI systems are designed to perform tasks such as visual perception, speech recognition, decision-making, and language translation.
+
+### What is Machine Learning (ML)?
+
+Machine Learning is a subset of AI that focuses on enabling machines to learn from data and improve their performance over time without being explicitly programmed for each task. It involves algorithms that identify patterns in data and make predictions or decisions.
+
+### What is Deep Learning?
+
+Deep Learning is a further subset of ML that uses artificial neural networks inspired by the human brain. These networks consist of layers that process data in complex ways, allowing the model to learn hierarchical representations and handle large amounts of unstructured data like images and text.
+
+### A Brief History
+
+- **1950s**: Alan Turing introduced the concept of machines that could mimic human intelligence, leading to the famous Turing Test.
+- **1956**: John McCarthy coined the term 'Artificial Intelligence' at the Dartmouth Conference, marking the birth of AI as a field.
+- **1980s**: The revival of neural networks with the backpropagation algorithm enabled better training of multi-layer networks.
+- **2000s-Present**: Advances in computational power, data availability, and algorithms led to breakthroughs in AI, particularly in ML and Deep Learning.
+
+---
+
+## Exploring New Orleans Short-Term Rental Licenses Dataset
+
+### Introduction to the Dataset
+
+We will analyze a dataset containing information about short-term rental licenses in New Orleans. This dataset includes details such as:
+
+- License types and statuses
+- Property types and locations
+- Operator information
+- Dates of application and issuance
+- Rental unit characteristics (number of bedrooms, occupancy, etc.)
+
+Analyzing this data will help us understand patterns in short-term rentals across the city and demonstrate how machine learning can be applied to real-world data.
+
+---
+
+## Importing Libraries
+
+Before we start, we need to import the necessary Python libraries for data manipulation, visualization, and machine learning.
+
+```python
+# Data manipulation and analysis
+import pandas as pd
+import numpy as np
+
+# Data visualization
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+# Machine learning algorithms and tools
+from sklearn.preprocessing import LabelEncoder, OneHotEncoder
+from sklearn.model_selection import train_test_split, cross_val_score, GridSearchCV
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.metrics import classification_report, confusion_matrix, accuracy_score
+from sklearn.neural_network import MLPClassifier
+
+# Ignore warnings
+import warnings
+warnings.filterwarnings('ignore')
+```
+
+---
+
+## Loading the Dataset
+
+Let's load the dataset into a pandas DataFrame. Replace `'str_data.csv'` with the actual path to your CSV file.
+
+```python
+# Load the dataset
+df = pd.read_csv('str_data.csv')
+```
+
+---
+
+## Exploratory Data Analysis (EDA)
+
+### Viewing the Data
+
+First, let's take a look at the first few rows of the dataset to understand its structure.
+
+```python
+# Display the first five rows
+df.head()
+```
+
+### Understanding the Data Structure
+
+We can get a summary of the DataFrame to see the data types and non-null counts.
+
+```python
+# Get information about the DataFrame
+df.info()
+```
+
+### Summary Statistics
+
+Let's view summary statistics for numerical columns.
+
+```python
+# Summary statistics
+df.describe()
+```
+
+### Checking for Missing Values
+
+Identifying missing values is crucial for data cleaning.
+
+```python
+# Check for missing values
+df.isnull().sum()
+```
+
+---
+
+## Data Preprocessing
+
+Data preprocessing involves cleaning and transforming data to prepare it for analysis.
+
+### Handling Missing Values
+
+We can choose to drop rows with missing values or fill them using appropriate methods.
+
+```python
+# Drop rows with missing values
+df = df.dropna()
+```
+
+### Encoding Categorical Variables
+
+Machine learning models require numerical input. We'll convert categorical variables into numerical form.
+
+#### Label Encoding
+
+Label Encoding converts categorical text data into model-understandable numerical data.
+
+```python
+# Create a copy of the DataFrame
+df_encoded = df.copy()
+
+# Initialize LabelEncoder
+le = LabelEncoder()
+
+# List of categorical columns to encode
+categorical_cols = ['Type', 'Current Status', 'Type of Building', 'Partial/Whole', 'Operator Type']
+
+# Apply LabelEncoder to each column
+for col in categorical_cols:
+    df_encoded[col] = le.fit_transform(df_encoded[col])
+```
+
+#### One-Hot Encoding
+
+Alternatively, One-Hot Encoding creates binary columns for each category.
+
+```python
+# One-Hot Encoding using pandas
+df_encoded = pd.get_dummies(df, columns=categorical_cols)
+```
+
+### Feature Selection
+
+Selecting relevant features is essential for building effective models.
+
+```python
+# Define features (X) and target variable (y)
+# For example, let's predict 'Current Status' based on other features
+X = df_encoded.drop(['Current Status', 'License Number', 'Issue Date', 'Owner', 'Operator Email', 'Location'], axis=1)
+y = df_encoded['Current Status']
+```
+
+---
+
+## Data Visualization
+
+Visualizing data helps uncover patterns and insights.
+
+### Distribution of License Types
+
+```python
+# Plotting the distribution of license types
+plt.figure(figsize=(8,6))
+sns.countplot(x='Type', data=df)
+plt.title('Distribution of License Types')
+plt.xlabel('License Type')
+plt.ylabel('Count')
+plt.xticks(rotation=45)
+plt.show()
+```
+
+### Number of Licenses by Building Type
+
+```python
+# Plotting the number of licenses by building type
+plt.figure(figsize=(10,6))
+sns.countplot(y='Type of Building', data=df, order=df['Type of Building'].value_counts().index)
+plt.title('Number of Licenses by Building Type')
+plt.xlabel('Count')
+plt.ylabel('Building Type')
+plt.show()
+```
+
+### Correlation Heatmap
+
+Understanding correlations between variables.
+
+```python
+# Compute correlation matrix
+corr_matrix = df_encoded.corr()
+
+# Plot heatmap
+plt.figure(figsize=(12,10))
+sns.heatmap(corr_matrix, annot=True, fmt='.2f')
+plt.title('Correlation Matrix')
+plt.show()
+```
+
+---
+
+## Machine Learning with Scikit-Learn
+
+We'll build a Decision Tree Classifier to predict the 'Current Status' of a license based on other features.
+
+### Splitting the Dataset
+
+Split the data into training and testing sets.
+
+```python
+# Split data into training and testing sets
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, stratify=y, random_state=42)
+```
+
+### Building and Training the Model
+
+```python
+# Initialize the Decision Tree Classifier
+clf = Decision TreeClassifier(random_state=42)
+
+# Train the model
+clf.fit(X_train, y_train)
+```
+
+### Evaluating the Model
+
+```python
+# Make predictions on the test set
+y_pred = clf.predict(X_test)
+
+# Classification report
+print("Classification Report:")
+print(classification_report(y_test, y_pred))
+
+# Confusion matrix
+print("Confusion Matrix:")
+print(confusion_matrix(y_test, y_pred))
+
+# Accuracy score
+accuracy = accuracy_score(y_test, y_pred)
+print(f"Model Accuracy: {accuracy:.2f}")
+```
+
+---
+
+## Interpreting the Results
+
+The classification report provides precision, recall, F1-score, and support for each class.
+
+- **Precision**: The ability of the classifier not to label as positive a sample that is negative.
+- **Recall**: The ability of the classifier to find all the positive samples.
+- **F1-Score**: The harmonic mean of precision and recall.
+
+The confusion matrix shows the counts of true positives, false positives, true negatives, and false negatives.
+
+---
+
+## Feature Importance
+
+Understanding which features influence the predictions.
+
+```python
+# Get feature importances
+feature_importances = pd.Series(clf.feature_importances_, index=X.columns)
+
+# Sort and plot
+feature_importances.sort_values(ascending=False).plot(kind='bar', figsize=(12,6))
+plt.title('Feature Importance')
+plt.ylabel('Importance Score')
+plt.show()
+```
+
+---
+
+## Improving the Model
+
+### Hyperparameter Tuning with GridSearchCV
+
+```python
+# Define parameter grid
+param_grid = {
+    'max_depth': [None, 5, 10, 20],
+    'min_samples_split': [2, 5, 10]
+}
+
+# Initialize GridSearchCV
+grid_search = GridSearchCV(clf, param_grid, cv=5, scoring='accuracy')
+
+# Fit to the training data
+grid_search.fit(X_train, y_train)
+
+# Best parameters
+print("Best Parameters:", grid_search.best_params_)
+
+# Best estimator
+best_clf = grid_search.best_estimator_
+```
+
+### Evaluating the Tuned Model
+
+```python
+# Predict with the best estimator
+y_pred_best = best_clf.predict(X_test)
+
+# Classification report
+print("Classification Report for Best Model:")
+print(classification_report(y_test, y_pred_best))
+
+# Accuracy score
+best_accuracy = accuracy_score(y_test, y_pred_best)
+print(f"Best Model Accuracy: {best_accuracy:.2f}")
+```
+
+---
+
+## Building a Neural Network with Scikit-Learn
+
+We can also try a Neural Network model using `MLPClassifier`.
+
+### Training the Neural Network
+
+```python
+# Initialize the MLPClassifier
+mlp = MLPClassifier(hidden_layer_sizes=(50, 25), max_iter=300, random_state=42)
+
+# Train the model
+mlp.fit(X_train, y_train)
+```
+
+### Evaluating the Neural Network
+
+```python
+# Make predictions
+y_pred_mlp = mlp.predict(X_test)
+
+# Classification report
+print("Classification Report for Neural Network:")
+print(classification_report(y_test, y_pred_mlp))
+
+# Accuracy score
+mlp_accuracy = accuracy_score(y_test, y_pred_mlp)
+print(f"Neural Network Accuracy: {mlp_accuracy:.2f}")
+```
+
+---
+
+## Cross-Validation
+
+Using cross-validation to assess model performance more robustly.
+
+```python
+# Cross-validation scores for the Decision Tree
+cv_scores = cross_val_score(clf, X, y, cv=5, scoring='accuracy')
+print("Cross-Validation Scores:", cv_scores)
+print(f"Average Cross-Validation Score: {cv_scores.mean():.2f}")
+```
+
+---
+
+## Conclusion
+
+### Key Takeaways
+
+- **Data Preprocessing**: Cleaning and encoding data is a crucial step in preparing for machine learning.
+- **Exploratory Data Analysis**: Visualizations help in understanding the data and identifying patterns.
+- **Model Building**: We built and evaluated a Decision Tree Classifier and a Neural Network.
+- **Model Improvement**: Hyperparameter tuning and cross-validation can enhance model performance.
+- **Feature Importance**: Identifying important features helps in understanding what drives the predictions.
+
+### Next Steps
+
+- **Further Feature Engineering**: Create new features or transform existing ones to improve the model.
+- **Address Class Imbalance**: If classes are imbalanced, consider techniques like SMOTE or adjusting class weights.
+- **Use More Advanced Models**: Explore other algorithms like Random Forests, Gradient Boosting, or Support Vector Machines.
+- **Deploy the Model**: Integrate the model into an application or service for practical use.
+
+---
+
+## Ethical Considerations
+
+When working with data, especially involving personal or sensitive information, it's important to:
+
+- **Ensure Data Privacy**: Handle data in compliance with relevant laws and regulations.
+- **Avoid Bias**: Be aware of potential biases in data and models that could lead to unfair outcomes.
+- **Transparency**: Be clear about how data is used and how models make decisions.
+
+---
+
+## Final Thoughts
+
+By analyzing the New Orleans Short-Term Rental Licenses dataset, we've demonstrated how machine learning can provide insights into real-world data. This process involves:
+
+1. **Understanding the Problem**: Knowing what you want to predict or analyze.
+2. **Preparing the Data**: Cleaning and transforming data into a usable format.
+3. **Exploring the Data**: Using visualizations to uncover patterns.
+4. **Building Models**: Training algorithms to learn from the data.
+5. **Evaluating Models**: Assessing performance and making improvements.
+6. **Drawing Conclusions**: Interpreting the results to make informed decisions.
+
+---
+
+Thank you for exploring this introduction to AI and Machine Learning with a focus on New Orleans' short-term rental data. We hope this provides a foundation for further learning and application in your own projects!
